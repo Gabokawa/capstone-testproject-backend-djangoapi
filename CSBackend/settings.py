@@ -82,9 +82,9 @@ WSGI_APPLICATION = 'CSBackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'testdb1',      # Replace with your database name
-        'USER': 'postgres',      # Replace with your PostgreSQL user
-        'PASSWORD': 'postgresqlpassword',  # Replace with your PostgreSQL password
+        'NAME': 'testdb1_qhyk',      # Replace with your database name
+        'USER': 'testdb1_qhyk_user',      # Replace with your PostgreSQL user
+        'PASSWORD': 'kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb',  # Replace with your PostgreSQL password
         'HOST': 'localhost',         # Or your database host if different
         'PORT': '5432',              # Default PostgreSQL port
     }
