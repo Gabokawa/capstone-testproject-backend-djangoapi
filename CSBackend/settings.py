@@ -83,7 +83,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk')
+        default='postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk'
     ) 
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
