@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'testdb1_qhyk',      # Replace with your database name
         'USER': 'testdb1_qhyk_user',      # Replace with your PostgreSQL user
         'PASSWORD': 'kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb',  # Replace with your PostgreSQL password
-        'HOST': 'localhost',         # Or your database host if different
+        'HOST': 'postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk',         # Or your database host if different
         'PORT': '5432',              # Default PostgreSQL port
     }
 }
