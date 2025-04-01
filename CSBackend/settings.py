@@ -78,16 +78,21 @@ WSGI_APPLICATION = 'CSBackend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+import dj_database_url
+import os
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'testdb1_qhyk',      # Replace with your database name
-        'USER': 'testdb1_qhyk_user',      # Replace with your PostgreSQL user
-        'PASSWORD': 'kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb',  # Replace with your PostgreSQL password
-        'HOST': 'postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk',         # Or your database host if different
-        'PORT': '5432',              # Default PostgreSQL port
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk')
+    ) 
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'testdb1_qhyk',      # Replace with your database name
+    #     'USER': 'testdb1_qhyk_user',      # Replace with your PostgreSQL user
+    #     'PASSWORD': 'kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb',  # Replace with your PostgreSQL password
+    #     'HOST': 'postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk',         # Or your database host if different
+    #     'PORT': '5432',              # Default PostgreSQL port
+    # }
 }
 
 
