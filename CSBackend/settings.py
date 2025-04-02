@@ -27,8 +27,8 @@ ALLOWED_HOSTS = [
     ]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
+# DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 # Ensure Django binds to any IP
 if not DEBUG:
     ALLOWED_HOSTS.append("*")
