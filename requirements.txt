@@ -7,3 +7,4 @@ sqlparse==0.5.3
 tzdata==2025.1
 django-cors-headers==4.7.0
 dj-database-url==2.3.0
+dotenv==0.9.9

@@ -86,11 +86,16 @@ WSGI_APPLICATION = 'CSBackend.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 import dj_database_url
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk'
+        default = os.getenv('DATABASE_URL')  # this is for connection to db
     ) 
+
+
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
     #     'NAME': 'testdb1_qhyk',      # Replace with your database name
