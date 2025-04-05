@@ -178,3 +178,8 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://capstone-testproject-backend-djangoapi.onrender.com',  # Replace with your deployed domain
+    'http://localhost',  # Optional: for local testing
+]
