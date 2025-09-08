@@ -45,7 +45,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',   
     'rest_framework',  
     'users',           
-    'corsheaders',     
+    'corsheaders',  
+    'services',
+    'requests',
+    'professionals',
+    'quotes',
+    'payments',
+    'chat',
+    'reviews',
+    'notifications',
+    
 ]
 
 MIDDLEWARE = [
@@ -91,19 +100,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default = os.getenv('DATABASE_URL')  # this is for connection to db
-    ) 
+    # 'default': dj_database_url.config(
+    #     default = os.getenv('DATABASE_URL')  # this is for connection to db
+    # ) 
 
 
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'testdb1_qhyk',      # Replace with your database name
-    #     'USER': 'testdb1_qhyk_user',      # Replace with your PostgreSQL user
-    #     'PASSWORD': 'kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb',  # Replace with your PostgreSQL password
-    #     'HOST': 'postgresql://testdb1_qhyk_user:kr8S7U1TifZMvEGoMQlUtDQKXm6ZhzLb@dpg-cvm133pr0fns73fuco5g-a/testdb1_qhyk',         # Or your database host if different
-    #     'PORT': '5432',              # Default PostgreSQL port
-    # }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'testdb1',      # Replace with your database name
+        'USER': 'postgres',      # Replace with your PostgreSQL user
+        'PASSWORD': 'postgresqlpassword',  # Replace with your PostgreSQL password
+        'HOST': 'localhost',         # Or your database host if different
+        'PORT': '5432',              # Default PostgreSQL port
+    }
 }
 
 
