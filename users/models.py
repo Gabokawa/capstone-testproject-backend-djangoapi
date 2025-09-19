@@ -30,7 +30,7 @@ class User(AbstractUser):
         ('admin', 'Admin'),
     ]
     
-    user_id = models.AutoField(primary_key=True)
+    user_id = models.AutoField(primary_key=True, default=None)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -55,7 +55,7 @@ class User(AbstractUser):
 class UserRoleMapping(models.Model):
     """Many-to-many relationship between users and roles"""
     mapping_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     role = models.ForeignKey(UserRole, on_delete=models.CASCADE)
     assigned_at = models.DateTimeField(auto_now_add=True)
     
@@ -69,7 +69,7 @@ class UserRoleMapping(models.Model):
 class Address(models.Model):
     """User address management"""
     address_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     region = models.CharField(max_length=100)
     full_address = models.TextField()
     latitude = models.DecimalField(max_digits=10, decimal_places=8)
