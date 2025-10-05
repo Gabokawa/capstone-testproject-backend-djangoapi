@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from .models import User
-from django.views.decorators.http import require_POST, require_PUT, require_GET, require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
@@ -12,14 +12,20 @@ from django.contrib.auth.decorators import login_required
 def signup(request):
     try:
         data = json.loads(request.body)
+        print(data)  # Debug: Print the received data
         email = data.get('email')
         password = data.get('password')
         first_name = data.get('first_name')
         last_name = data.get('last_name')
         user_type = data.get('user_type')
        
-        if not all([email, password, first_name, last_name, user_type]):
-            return JsonResponse({"error": "Missing required fields."}, status=400)
+        required_fields = ['email', 'password', 'first_name', 'last_name', 'user_type']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
+            return JsonResponse({"error": f"Missing required fields: {', '.join(missing_fields)}"}, status=400)
+        
+        # if not all([email, password, first_name, last_name, user_type]):
+        #     return JsonResponse({"error": "Missing required fields."}, status=400)
        
         if User.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email already exists."}, status=400)

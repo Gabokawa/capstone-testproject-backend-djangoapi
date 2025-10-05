@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ServiceRequest, RequestMedia
-from accounts.models import User, Address
+from users.models import User, Address
 from services.models import Service
 
 
