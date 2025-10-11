@@ -14,7 +14,7 @@ class ServiceCategoryViewSet(viewsets.ViewSet):
     """
     
     def list(self, request):
-        """GET /api/service-categories/ - List all categories"""
+        """GET /service-categories/ - List all categories"""
         queryset = ServiceCategory.objects.all()
         
         # Optional filtering
@@ -26,7 +26,7 @@ class ServiceCategoryViewSet(viewsets.ViewSet):
         return Response(serializer.data)
     
     def create(self, request):
-        """POST /api/service-categories/ - Create a new category"""
+        """POST /service-categories/ - Create a new category"""
         serializer = ServiceCategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -34,13 +34,13 @@ class ServiceCategoryViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def retrieve(self, request, pk=None):
-        """GET /api/service-categories/{id}/ - Retrieve a specific category"""
+        """GET /service-categories/{id}/ - Retrieve a specific category"""
         category = get_object_or_404(ServiceCategory, pk=pk)
         serializer = ServiceCategorySerializer(category)
         return Response(serializer.data)
     
     def update(self, request, pk=None):
-        """PUT /api/service-categories/{id}/ - Full update of a category"""
+        """PUT /service-categories/{id}/ - Full update of a category"""
         category = get_object_or_404(ServiceCategory, pk=pk)
         serializer = ServiceCategorySerializer(category, data=request.data)
         if serializer.is_valid():
@@ -49,7 +49,7 @@ class ServiceCategoryViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def partial_update(self, request, pk=None):
-        """PATCH /api/service-categories/{id}/ - Partial update of a category"""
+        """PATCH /service-categories/{id}/ - Partial update of a category"""
         category = get_object_or_404(ServiceCategory, pk=pk)
         serializer = ServiceCategorySerializer(category, data=request.data, partial=True)
         if serializer.is_valid():
@@ -58,14 +58,14 @@ class ServiceCategoryViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def destroy(self, request, pk=None):
-        """DELETE /api/service-categories/{id}/ - Delete a category"""
+        """DELETE /service-categories/{id}/ - Delete a category"""
         category = get_object_or_404(ServiceCategory, pk=pk)
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=True, methods=['get'])
     def services(self, request, pk=None):
-        """GET /api/service-categories/{id}/services/ - Get all services in a category"""
+        """GET /service-categories/{id}/services/ - Get all services in a category"""
         category = get_object_or_404(ServiceCategory, pk=pk)
         services = Service.objects.filter(category=category)
         serializer = ServiceSerializer(services, many=True)
@@ -77,7 +77,7 @@ class ServiceViewSet(viewsets.ViewSet):
     """
     
     def list(self, request):
-        """GET /api/services/ - List all services"""
+        """GET /services/ - List all services"""
         queryset = Service.objects.select_related('category').all()
         
         # Optional filtering
@@ -93,7 +93,7 @@ class ServiceViewSet(viewsets.ViewSet):
         return Response(serializer.data)
     
     def create(self, request):
-        """POST /api/services/ - Create a new service"""
+        """POST /services/ - Create a new service"""
         serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -101,13 +101,13 @@ class ServiceViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def retrieve(self, request, pk=None):
-        """GET /api/services/{id}/ - Retrieve a specific service"""
+        """GET /services/{id}/ - Retrieve a specific service"""
         service = get_object_or_404(Service.objects.select_related('category'), pk=pk)
         serializer = ServiceSerializer(service)
         return Response(serializer.data)
     
     def update(self, request, pk=None):
-        """PUT /api/services/{id}/ - Full update of a service"""
+        """PUT /services/{id}/ - Full update of a service"""
         service = get_object_or_404(Service, pk=pk)
         serializer = ServiceSerializer(service, data=request.data)
         if serializer.is_valid():
@@ -116,7 +116,7 @@ class ServiceViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def partial_update(self, request, pk=None):
-        """PATCH /api/services/{id}/ - Partial update of a service"""
+        """PATCH /services/{id}/ - Partial update of a service"""
         service = get_object_or_404(Service, pk=pk)
         serializer = ServiceSerializer(service, data=request.data, partial=True)
         if serializer.is_valid():
@@ -125,7 +125,7 @@ class ServiceViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def destroy(self, request, pk=None):
-        """DELETE /api/services/{id}/ - Delete a service"""
+        """DELETE /services/{id}/ - Delete a service"""
         service = get_object_or_404(Service, pk=pk)
         service.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
