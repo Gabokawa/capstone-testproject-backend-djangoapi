@@ -3,9 +3,10 @@ from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from .models import User
+from .models import User, UserRole, UserRoleMapping, Address
 from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 @csrf_exempt
 @require_POST
@@ -104,6 +105,124 @@ def edit_account(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
+@csrf_exempt
+@require_http_methods(["PUT"])
+@login_required
+def edit_user_details(request):
+    """
+    Edit user details other than password.
+    Request body:
+    {
+        "profile_picture": "url_to_image",
+        "roles": [1, 2, 3],  // Array of role_ids to assign
+        "addresses": [
+            {
+                "address_id": 1,  // Only send if updating address, omit for new address
+                "region": "Misamis Oriental",
+                "full_address": "Lapasan, Cagayan de Oro City",
+                "latitude": "67.6767",
+                "longitude": "-67.6767",
+                "is_default": true
+            }
+        ],
+        "delete_addresses": [2, 3]  // Array of address_ids to delete
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        user = request.user
+        
+        if not data:
+            return JsonResponse({"error": "No data provided for update."}, status=400)
+        
+        with transaction.atomic():
+            # Update profile picture
+            if 'profile_picture' in data:
+                user.profile_picture = data['profile_picture']
+                user.save()
+            
+            # Update user roles
+            if 'roles' in data:
+                role_ids = data['roles']
+                if not isinstance(role_ids, list):
+                    return JsonResponse({"error": "Roles must be an array of role IDs."}, status=400)
+                
+                # Remove existing role mappings
+                UserRoleMapping.objects.filter(user=user).delete()
+                
+                # Add new role mappings
+                for role_id in role_ids:
+                    try:
+                        role = UserRole.objects.get(role_id=role_id)
+                        UserRoleMapping.objects.create(user=user, role=role)
+                    except UserRole.DoesNotExist:
+                        return JsonResponse({"error": f"Role with ID {role_id} does not exist."}, status=400)
+            
+            # Handle address updates/creates
+            if 'addresses' in data:
+                addresses = data['addresses']
+                if not isinstance(addresses, list):
+                    return JsonResponse({"error": "Addresses must be an array."}, status=400)
+                
+                for addr_data in addresses:
+                    address_id = addr_data.get('address_id')
+                    
+                    # Validate required fields for new addresses
+                    required_fields = ['region', 'full_address', 'latitude', 'longitude']
+                    if not address_id:
+                        missing_fields = [field for field in required_fields if field not in addr_data]
+                        if missing_fields:
+                            return JsonResponse({
+                                "error": f"Missing required fields for address: {', '.join(missing_fields)}"
+                            }, status=400)
+                    
+                    # If is_default is True, set all other addresses to False
+                    if addr_data.get('is_default', False):
+                        Address.objects.filter(user=user).update(is_default=False)
+                    
+                    if address_id:
+                        # Update existing address
+                        try:
+                            address = Address.objects.get(address_id=address_id, user=user)
+                            for field in ['region', 'full_address', 'latitude', 'longitude', 'is_default']:
+                                if field in addr_data:
+                                    setattr(address, field, addr_data[field])
+                            address.save()
+                        except Address.DoesNotExist:
+                            return JsonResponse({
+                                "error": f"Address with ID {address_id} does not exist or doesn't belong to user."
+                            }, status=400)
+                    else:
+                        # Create new address
+                        Address.objects.create(
+                            user=user,
+                            region=addr_data['region'],
+                            full_address=addr_data['full_address'],
+                            latitude=addr_data['latitude'],
+                            longitude=addr_data['longitude'],
+                            is_default=addr_data.get('is_default', False)
+                        )
+            
+            # Delete addresses
+            if 'delete_addresses' in data:
+                delete_ids = data['delete_addresses']
+                if not isinstance(delete_ids, list):
+                    return JsonResponse({"error": "delete_addresses must be an array of address IDs."}, status=400)
+                
+                Address.objects.filter(address_id__in=delete_ids, user=user).delete()
+        
+        return JsonResponse({
+            "message": "User details updated successfully.",
+            "updated_fields": list(data.keys())
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON format."}, status=400)
+    except ValueError as e:
+        return JsonResponse({"error": f"Invalid value: {str(e)}"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 @csrf_exempt
 @require_http_methods(["DELETE"])
