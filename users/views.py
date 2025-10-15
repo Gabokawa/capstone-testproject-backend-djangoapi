@@ -7,36 +7,39 @@ from .models import User, UserRole, UserRoleMapping, Address
 from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from rest_framework_simplejwt.tokens import RefreshToken as refresh
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 
 @csrf_exempt
-@require_POST
+@api_view(['POST'])
 def signup(request):
     try:
         data = json.loads(request.body)
         print(data)  # Debug: Print the received data
+        username = data.get('username')
         email = data.get('email')
         password = data.get('password')
         first_name = data.get('first_name')
         last_name = data.get('last_name')
         user_type = data.get('user_type')
-       
-        required_fields = ['email', 'password', 'first_name', 'last_name', 'user_type']
+
+        required_fields = ['username', 'email', 'password', 'first_name', 'last_name', 'user_type']
         missing_fields = [field for field in required_fields if not data.get(field)]
         if missing_fields:
             return JsonResponse({"error": f"Missing required fields: {', '.join(missing_fields)}"}, status=400)
         
-        # if not all([email, password, first_name, last_name, user_type]):
-        #     return JsonResponse({"error": "Missing required fields."}, status=400)
-       
         if User.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email already exists."}, status=400)
        
         user = User(
+            username=username,
             email=email,
             first_name=first_name,
             last_name=last_name,
-            user_type=user_type,
-            username=email # Using email as username for consistency
+            user_type=user_type
         )
         user.set_password(password)
         user.save()
@@ -49,7 +52,7 @@ def signup(request):
         return JsonResponse({"error": str(e)}, status=500)
     
 @csrf_exempt
-@require_POST
+@api_view(['POST'])
 def login_view(request):
     try:
         data = json.loads(request.body)
@@ -60,7 +63,13 @@ def login_view(request):
        
         if user is not None:
             login(request, user)
-            return JsonResponse({"message": "Login successful."})
+            return JsonResponse({
+                "message": "Login successful.", 
+                "user_type": user.user_type,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                }, 
+                status=200)
         else:
             return JsonResponse({"error": "Invalid credentials."}, status=400)
    
@@ -68,16 +77,16 @@ def login_view(request):
         return JsonResponse({"error": "Invalid JSON format."}, status=400)
 
 @csrf_exempt
-@require_POST
-@login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def logout_view(request):
     logout(request)
     return JsonResponse({"message": "Logged out successfully."})
 
 
 @csrf_exempt
-@require_http_methods(["PUT"])
-@login_required
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def edit_account(request):
     try:
         data = json.loads(request.body)
@@ -106,8 +115,8 @@ def edit_account(request):
         return JsonResponse({"error": str(e)}, status=500)
     
 @csrf_exempt
-@require_http_methods(["PUT"])
-@login_required
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def edit_user_details(request):
     """
     Edit user details other than password.
@@ -225,8 +234,8 @@ def edit_user_details(request):
 
 
 @csrf_exempt
-@require_http_methods(["DELETE"])
-@login_required
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_account(request):
     try:
         user = request.user
@@ -237,7 +246,20 @@ def delete_account(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details(request):
+    # request.user is automatically set from the JWT token!
+    user = request.user
+    
+    return JsonResponse({
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "username": user.username,
+        "user_type": user.user_type
+    }, status=200)
 
 
 
