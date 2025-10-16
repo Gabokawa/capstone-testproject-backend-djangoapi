@@ -90,7 +90,7 @@ def logout_view(request):
 @permission_classes([IsAuthenticated])
 def edit_account(request):
     try:
-        data = json.loads(request.body)
+        data = request.data
         user = request.user
        
         if not data:
