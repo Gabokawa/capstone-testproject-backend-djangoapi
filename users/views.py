@@ -7,7 +7,7 @@ from .models import User, UserRole, UserRoleMapping, Address
 from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from rest_framework_simplejwt.tokens import RefreshToken as refresh
+from rest_framework_simplejwt.tokens import RefreshToken as refreshtk
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -62,6 +62,7 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
        
         if user is not None:
+            refresh = refreshtk.for_user(user)
             login(request, user)
             return JsonResponse({
                 "message": "Login successful.", 

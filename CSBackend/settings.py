@@ -192,3 +192,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://capstone-testproject-backend-djangoapi.onrender.com',  # Replace with your deployed domain
     'http://localhost',  # Optional: for local testing
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
