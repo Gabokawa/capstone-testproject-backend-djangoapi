@@ -43,9 +43,10 @@ def signup(request):
         )
         user.set_password(password)
         user.save()
-       
-        return JsonResponse({"message": "User created successfully."}, status=201)
-   
+        refresh = refreshtk.for_user(user)
+        print("Token generated: ", str(refresh.access_token))  # Debug: Print the generated token
+        return JsonResponse({"message": "User created successfully.", "token": str(refresh.access_token)}, status=201)
+
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON format."}, status=400)
     except Exception as e:
@@ -81,8 +82,29 @@ def login_view(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
-    logout(request)
-    return JsonResponse({"message": "Logged out successfully."})
+    # logout(request)
+    # return JsonResponse({"message": "Logged out successfully."})
+    try:
+        # Get refresh token from request body
+        refresh_token = request.data.get("refresh_token")
+        
+        if refresh_token:
+            # Blacklist the refresh token
+            token = refreshtk(refresh_token)
+            token.blacklist()
+            
+            return Response({
+                "message": "Logged out successfully."
+            }, status=200)
+        else:
+            return Response({
+                "error": "Refresh token is required."
+            }, status=400)
+            
+    except Exception as e:
+        return Response({
+            "error": str(e)
+        }, status=200)
 
 
 @csrf_exempt
