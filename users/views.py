@@ -11,6 +11,11 @@ from rest_framework_simplejwt.tokens import RefreshToken as refreshtk
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import status, generics, permissions
+from rest_framework.exceptions import PermissionDenied
+
+# SERIALIZERS IMPORT
+from .serializers import AddressSerializer
 
 
 @csrf_exempt
@@ -281,166 +286,50 @@ def get_user_details(request):
         "last_name": user.last_name,
         "email": user.email,
         "username": user.username,
-        "user_type": user.user_type
+        "user_type": user.user_type,
+        "user_id": user.id,
     }, status=200)
 
+class AddressListCreateView(generics.ListCreateAPIView):
+    """
+    GET: List all addresses of the authenticated user.
+    POST: Create a new address for the authenticated user.
+    """
+    serializer_class = AddressSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Address.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class AddressDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a specific address.
+    Only the owner can perform these actions.
+    """
+    serializer_class = AddressSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'address_id'
+
+    def get_queryset(self):
+        # User can only access their own addresses
+        return Address.objects.filter(user=self.request.user)
+
+    def perform_update(self, serializer):
+        # Prevent changing the owner through update
+        if serializer.instance.user != self.request.user:
+            raise PermissionDenied("You do not have permission to edit this address.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.user != self.request.user:
+            raise PermissionDenied("You do not have permission to delete this address.")
+        instance.delete()
 
 
 
 
 
 
-
-
-# # Generic imports
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# import json
-# # For signup imports
-# from django.contrib.auth.hashers import make_password
-# # For login imports
-# from django.contrib.auth import authenticate, login, logout
-# # Model imports
-# from users.models import User
-# @csrf_exempt
-# def signup(request):
-#     try:
-#         if request.method == 'POST':
-#             data = json.loads(request.body) # Convert Request Body to JSON
-#             username = data['username']
-#             password = data['password']
-            
-#             if User.objects.filter(username=username).exists(): # Check if username already exists
-#                 return JsonResponse({
-#                     'status': 400,
-#                     'message': 'Username already exists'
-#                 })
-#             else:
-#                 User.objects.create(username=username, password=make_password(password)) # Create User
-#                 return JsonResponse({
-#                     'status': 200,
-#                     'message': 'User created'
-#                 })
-            
-#         else:
-#             return JsonResponse({
-#                 'status': 400,
-#                 'message': 'Invalid request'
-#             })
-        
-#     except Exception as e:
-#         return JsonResponse({
-#             'status': 400,
-#             'message': 'Error: ' + str(e)
-#         })
-
-# @csrf_exempt
-# def login_view(request):
-#     try:
-#         if request.method == 'POST':
-#             data = json.loads(request.body)
-
-#             username = data['username']
-#             password = data['password']
-
-#             # Debug
-#             print("Username: ", username)
-#             print("Password: ", password)
-
-#             # Check if exists and password matches
-#             try:
-#                 user = User.objects.get(username=username)
-#                 if user.check_password(password):
-#                     print("Password matches!")
-#                 else:
-#                     print("Password does not match!")
-#             except User.DoesNotExist:
-#                 print("User not found!")
-
-#             # Check user is already authenticated
-#             if request.user.is_authenticated:
-#                 return JsonResponse({
-#                     'status': 400,
-#                     'message': 'User already logged in'
-#                 })
-
-#             # Authenticate user
-#             user = authenticate(username=username, password=password)
-#             print("Authenticated user: ", user)
-
-#             if user is not None:
-#                 login(request, user)
-#                 return JsonResponse({
-#                     'status': 200,
-#                     'message': 'Logged in'
-#                 })
-#             else:
-#                 return JsonResponse({
-#                     'status': 400,
-#                     'message': 'Invalid credentials'
-#                 })
-        
-#         else:
-#             return JsonResponse({
-#                 'status': 400,
-#                 'message': 'Invalid request method'
-#             })
-
-#     except Exception as e:
-#         return JsonResponse({
-#             'status': 400,
-#             'message': 'Error: ' + str(e)
-#         })
-
-# @csrf_exempt
-# def logout_view(request):
-#     try:
-#         if request.method == 'POST':
-#             logout(request) # MIGHT CHANGE, LOGS USER OUT REGARDLESS KUNG KINSA NAGCLICK. MIGHT LOG EVERYONE OUT
-#             return JsonResponse({
-#                 'status': 200,
-#                 'message': 'Logged out'
-#             })
-#         else:
-#             return JsonResponse({
-#                 'status': 400,
-#                 'message': 'Invalid request method'
-#             })
-    
-#     except Exception as e:
-#         return JsonResponse({
-#             'status': 400,
-#             'message': 'Error: ' + str(e)
-#         })
-
-# @csrf_exempt
-# def get_details(request):
-#     try:
-#         if request.method == 'GET':
-#             data = json.loads(request.body)
-#             username = data['username']
-
-#             user = User.objects.get(username=username)
-
-#             if request.user.is_authenticated:
-#                 return JsonResponse({
-#                     'status': 200,
-#                     'username': user.username
-#                 })
-#             else:
-#                 return JsonResponse({
-#                     'status': 400,
-#                     'message': 'Not logged in'
-#                 })
-        
-#         else:
-#             return JsonResponse({
-#                 'status': 400,
-#                 'message': 'Invalid request'
-#             })
-
-#     except Exception as e:
-#         return JsonResponse({
-#             'status': 400,
-#             'message': 'Error: ' + str(e)
-#         })
