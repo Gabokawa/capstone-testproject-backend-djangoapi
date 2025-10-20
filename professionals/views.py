@@ -237,6 +237,7 @@ def working_hours_list_create(request):
     """List all working hours or create new working hours"""
 
     if request.method == "GET":
+        # GET REQUEST TO professionals/working_hours/
         professional_id = request.GET.get('professional_id')
         day_of_week = request.GET.get('day_of_week')
         is_available = request.GET.get('is_available')
@@ -261,6 +262,7 @@ def working_hours_list_create(request):
         return Response({'working_hours': data}, status=status.HTTP_200_OK)
 
     elif request.method == "POST":
+        # POST REQUEST TO professionals/working_hours/
         data = request.data
         required_fields = ['professional_id', 'day_of_week', 'start_time', 'end_time']
 
