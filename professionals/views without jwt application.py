@@ -7,7 +7,6 @@ import json
 from .models import Professional, ProfessionalDocument, WorkingHours, ProfessionalService
 from users.models import User
 from services.models import Service
-
 # Create your views here.
 
 # ============ PROFESSIONAL VIEWS ============
