@@ -280,14 +280,23 @@ def delete_account(request):
 def get_user_details(request):
     # request.user is automatically set from the JWT token!
     user = request.user
-    
+   
     return JsonResponse({
+        "user_id": user.id,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "email": user.email,
         "username": user.username,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "profile_picture": user.profile_picture,
         "user_type": user.user_type,
-        "user_id": user.id,
+        "is_active": user.is_active,
+        "is_staff": user.is_staff,
+        "is_superuser": user.is_superuser,
+        "device_token": user.device_token,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+        # Note: password is intentionally excluded for security
     }, status=200)
 
 class AddressListCreateView(generics.ListCreateAPIView):
