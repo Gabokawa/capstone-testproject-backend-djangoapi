@@ -6,7 +6,7 @@ app_name = 'professionals'
 urlpatterns = [
     # Professional URLs
     path('', views.professional_list_create, name='professional_list_create'),
-    path('/<int:professional_id>/', views.professional_detail, name='professional_detail'),
+    path('<int:professional_id>/', views.professional_detail, name='professional_detail'),
     
     # Professional Document URLs
     path('documents/', views.document_list_create, name='document_list_create'),
