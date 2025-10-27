@@ -2,9 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Q, Count
@@ -15,15 +13,12 @@ from .serializers import (
     ServiceRequestCreateSerializer,
     RequestMediaSerializer
 )
-
-
 # Create your views here.
 
 class ServiceRequestViewSet(viewsets.ViewSet):
     """
     ViewSet for ServiceRequest CRUD operations
     """
-    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
@@ -189,7 +184,6 @@ class RequestMediaViewSet(viewsets.ViewSet):
     """
     ViewSet for RequestMedia CRUD operations
     """
-    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     
     def list(self, request):
@@ -282,17 +276,3 @@ class RequestMediaViewSet(viewsets.ViewSet):
             'success_count': len(created_media),
             'error_count': len(errors)
         }, status=status.HTTP_201_CREATED if created_media else status.HTTP_400_BAD_REQUEST)
-# ```
-
-# **Key changes made:**
-# 1. Added `authentication_classes = [JWTAuthentication]` to both `ServiceRequestViewSet` and `RequestMediaViewSet`
-# 2. This works alongside the existing `permission_classes = [IsAuthenticated]`
-
-# **How it works:**
-# - `JWTAuthentication` handles extracting and validating the JWT token from the `Authorization: Bearer <token>` header
-# - `IsAuthenticated` ensures that only authenticated users can access these endpoints
-# - Together they provide secure, token-based authentication for all endpoints
-
-# All endpoints now require a valid JWT token in the request headers:
-# ```
-# Authorization: Bearer <your_jwt_access_token>

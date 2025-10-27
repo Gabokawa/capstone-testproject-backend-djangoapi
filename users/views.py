@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
 from rest_framework.exceptions import PermissionDenied
+from django.db.models import Q
 
 # SERIALIZERS IMPORT
 from .serializers import AddressSerializer
@@ -69,7 +70,6 @@ def login_view(request):
        
         if user is not None:
             refresh = refreshtk.for_user(user)
-            login(request, user)
             return JsonResponse({
                 "message": "Login successful.", 
                 "user_type": user.user_type,
@@ -296,7 +296,32 @@ def get_user_details(request):
         "device_token": user.device_token,
         "created_at": user.created_at.isoformat() if user.created_at else None,
         "updated_at": user.updated_at.isoformat() if user.updated_at else None,
-        # Note: password is intentionally excluded for security
+    }, status=200)
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details_by_id(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    return JsonResponse({
+        "user_id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "username": user.username,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "profile_picture": user.profile_picture.url if user.profile_picture else None,
+        "user_type": user.user_type,
+        "is_active": user.is_active,
+        "is_staff": user.is_staff,
+        "is_superuser": user.is_superuser,
+        "device_token": user.device_token,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
     }, status=200)
 
 class AddressListCreateView(generics.ListCreateAPIView):
@@ -324,7 +349,8 @@ class AddressDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         # User can only access their own addresses
-        return Address.objects.filter(user=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        return Address.objects.filter(Q(user=self.request.user) | Q(user__id=user_id))
 
     def perform_update(self, serializer):
         # Prevent changing the owner through update
