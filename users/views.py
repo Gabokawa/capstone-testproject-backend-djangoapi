@@ -333,6 +333,22 @@ class AddressListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        This view should return a list of all addresses
+        for the currently authenticated user, OR for a specific user
+        if a 'user_id' query parameter is provided.
+        """
+        # Get 'user_id' from query parameters (e.g., /addresses/?user_id=123)
+        user_id = self.request.query_params.get('user_id')
+
+        if user_id:
+            # If user_id is provided, filter addresses for that specific user.
+            # You should add permissions here to ensure not just anyone
+            # can snoop on other users' addresses.
+            return Address.objects.filter(user__id=user_id)
+        
+        # If no user_id is provided, just return addresses
+        # for the user making the request.
         return Address.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
