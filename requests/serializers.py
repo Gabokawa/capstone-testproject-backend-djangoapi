@@ -4,14 +4,53 @@ from users.models import User, Address
 from services.models import Service
 
 
+# class RequestMediaSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = RequestMedia
+#         fields = ['media_id', 'request', 'media_type', 'media_name', 
+#                   'media_uri', 'thumbnail_uri', 'media_size', 
+#                   'uploaded_at', 'caption', 'is_public']
+#         read_only_fields = ['media_id', 'uploaded_at']
+
 class RequestMediaSerializer(serializers.ModelSerializer):
+    # This field accepts the actual file upload.
+    # It must match the key you used in formData.append()
+    # I've named it 'media_file' to match the frontend code
+    media_file = serializers.FileField(write_only=True)
+
     class Meta:
         model = RequestMedia
-        fields = ['media_id', 'request', 'media_type', 'media_name', 
-                  'media_uri', 'thumbnail_uri', 'media_size', 
-                  'uploaded_at', 'caption', 'is_public']
-        read_only_fields = ['media_id', 'uploaded_at']
+        
+        # 'media_file' is write-only. It won't be in the response.
+        # The model's FileField (e.g., 'media') will be in the response,
+        # which will serialize to a URL.
+        
+        # I'm assuming your model has a FileField named 'media'
+        # and all these other fields.
+        fields = [
+            'media_id', 'request', 'media_type', 'media_name', 
+            'media', 'thumbnail_uri', 'media_size', 
+            'uploaded_at', 'caption', 'is_public',
+            'media_file'  # Add the FileField
+        ]
+        read_only_fields = ['media_id', 'uploaded_at', 'media', 'thumbnail_uri']
 
+    def create(self, validated_data):
+        # 1. Pop the file off the validated data
+        uploaded_file = validated_data.pop('media_file')
+        
+        # 2. Get the other data
+        # (This assumes you sent 'request', 'media_type', 'media_name', 'media_size'
+        # in your FormData, which my frontend example does)
+        
+        # 3. Create the model instance with the metadata
+        media_instance = RequestMedia.objects.create(**validated_data)
+        
+        # 4. Save the file to the instance's FileField
+        # I am ASSUMING your model's FileField is named 'media'
+        media_instance.media.save(uploaded_file.name, uploaded_file, save=True)
+        
+        return media_instance
 
 class ServiceRequestListSerializer(serializers.ModelSerializer):
     """Serializer for list view with minimal related data"""
@@ -49,11 +88,10 @@ class ServiceRequestDetailSerializer(serializers.ModelSerializer):
     def get_address_full(self, obj):
         return {
             'address_id': obj.address.address_id,
-            'street': obj.address.street,
-            'city': obj.address.city,
-            'state': obj.address.state,
-            'zip_code': obj.address.zip_code,
-            'country': obj.address.country,
+            'region': obj.address.region,
+            'full_address': obj.address.full_address,
+            'latitude': obj.address.latitude,
+            'longitude': obj.address.longitude,
         }
 
 

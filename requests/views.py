@@ -15,7 +15,9 @@ from .serializers import (
     ServiceRequestCreateSerializer,
     RequestMediaSerializer
 )
-
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 
 # Create your views here.
 
@@ -185,12 +187,16 @@ class ServiceRequestViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class RequestMediaViewSet(viewsets.ViewSet):
+class RequestMediaViewSet(viewsets.ModelViewSet):
     """
     ViewSet for RequestMedia CRUD operations
     """
+
+    queryset = RequestMedia.objects.all()
+    serializer_class = RequestMediaSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
     
     def list(self, request):
         """GET /api/request-media/ - List all media files"""
@@ -213,12 +219,42 @@ class RequestMediaViewSet(viewsets.ViewSet):
         serializer = RequestMediaSerializer(queryset, many=True)
         return Response(serializer.data)
     
+    # def create(self, request):
+    #     """POST /requests/request-media/ - Upload a new media file"""
+    #     serializer = RequestMediaSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def create(self, request):
-        """POST /api/request-media/ - Upload a new media file"""
-        serializer = RequestMediaSerializer(data=request.data)
+        """POST /requests/request-media/ - Upload a new media file"""
+        # --- THIS IS THE FIX ---
+        # 1. Make a mutable copy of the data
+        mutable_data = request.data.copy()
+        
+        # 2. Manually convert the 'request' field from str to int
+        # This checks if 'request' is present and is a string-digit
+        if 'request' in mutable_data and isinstance(mutable_data['request'], str):
+            if mutable_data['request'].isdigit():
+                mutable_data['request'] = int(mutable_data['request'])
+                print(f"Converted 'request' to int: {mutable_data['request']}")
+            else:
+                # Handle case where it's not a valid digit string
+                return Response(
+                    {'request': 'Invalid pk. Must be an integer.'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # 3. Pass the *cleaned* data to the serializer
+        serializer = self.get_serializer(data=mutable_data)
+        # --- END OF FIX ---
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        # The serializer.errors will now be much more accurate
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def retrieve(self, request, pk=None):
