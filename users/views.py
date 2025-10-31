@@ -326,7 +326,7 @@ def get_user_details_by_id(request, user_id):
 
 class AddressListCreateView(generics.ListCreateAPIView):
     """
-    GET: List all addresses of the authenticated user.
+    GET: List all addresses of the authenticated user or with user id.
     POST: Create a new address for the authenticated user.
     """
     serializer_class = AddressSerializer

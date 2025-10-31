@@ -4,6 +4,7 @@ from django.db import models
 from django.db import models
 from users.models import User, Address
 from services.models import Service
+from professionals.models import Professional
 
 class ServiceRequest(models.Model):
     """Customer service requests"""
@@ -19,6 +20,16 @@ class ServiceRequest(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     address = models.ForeignKey(Address, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
+
+    # connecting this shit to professional model
+    professional = models.ForeignKey(
+        Professional, 
+        on_delete=models.SET_NULL, # so deleting wont delete the professional
+        null=True,                  # allows a request to be unassigned
+        blank=True,                 # allows it to be empty in forms
+        related_name="service_requests"
+    )
+
     device_type = models.CharField(max_length=100)
     device_brand = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -28,6 +39,7 @@ class ServiceRequest(models.Model):
     device_issue_description = models.TextField()
     requested_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(blank=True, null=True)
+    
     
     class Meta:
         app_label = 'requests'

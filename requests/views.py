@@ -31,7 +31,7 @@ class ServiceRequestViewSet(viewsets.ViewSet):
     def get_queryset(self):
         """Base queryset with optimizations"""
         return ServiceRequest.objects.select_related(
-            'customer', 'address', 'service', 'service__category'
+            'customer', 'address', 'service', 'service__category', 'professional' #<-- added professional here
         ).prefetch_related('requestmedia_set')
     
     def list(self, request):
@@ -44,7 +44,10 @@ class ServiceRequestViewSet(viewsets.ViewSet):
         service_id = request.query_params.get('service', None)
         date_from = request.query_params.get('date_from', None)
         date_to = request.query_params.get('date_to', None)
-        
+        professional_id = request.query_params.get('professional', None)
+
+        if professional_id:
+            queryset = queryset.filter(professional_id=professional_id)
         if customer_id:
             queryset = queryset.filter(customer_id=customer_id)
         if status_filter:
@@ -318,17 +321,3 @@ class RequestMediaViewSet(viewsets.ModelViewSet):
             'success_count': len(created_media),
             'error_count': len(errors)
         }, status=status.HTTP_201_CREATED if created_media else status.HTTP_400_BAD_REQUEST)
-# ```
-
-# **Key changes made:**
-# 1. Added `authentication_classes = [JWTAuthentication]` to both `ServiceRequestViewSet` and `RequestMediaViewSet`
-# 2. This works alongside the existing `permission_classes = [IsAuthenticated]`
-
-# **How it works:**
-# - `JWTAuthentication` handles extracting and validating the JWT token from the `Authorization: Bearer <token>` header
-# - `IsAuthenticated` ensures that only authenticated users can access these endpoints
-# - Together they provide secure, token-based authentication for all endpoints
-
-# All endpoints now require a valid JWT token in the request headers:
-# ```
-# Authorization: Bearer <your_jwt_access_token>

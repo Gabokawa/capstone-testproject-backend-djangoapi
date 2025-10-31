@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import ServiceRequest, RequestMedia
 from users.models import User, Address
 from services.models import Service
+from professionals.models import Professional
 
 
 # class RequestMediaSerializer(serializers.ModelSerializer):
@@ -40,14 +41,11 @@ class RequestMediaSerializer(serializers.ModelSerializer):
         uploaded_file = validated_data.pop('media_file')
         
         # 2. Get the other data
-        # (This assumes you sent 'request', 'media_type', 'media_name', 'media_size'
-        # in your FormData, which my frontend example does)
         
         # 3. Create the model instance with the metadata
         media_instance = RequestMedia.objects.create(**validated_data)
         
         # 4. Save the file to the instance's FileField
-        # I am ASSUMING your model's FileField is named 'media'
         media_instance.media.save(uploaded_file.name, uploaded_file, save=True)
         
         return media_instance
@@ -56,11 +54,12 @@ class ServiceRequestListSerializer(serializers.ModelSerializer):
     """Serializer for list view with minimal related data"""
     customer_name = serializers.CharField(source='customer.get_full_name', read_only=True)
     service_name = serializers.CharField(source='service.service_name', read_only=True)
+    professional_business_name = serializers.CharField(source='professional.business_name', read_only=True)
     
     class Meta:
         model = ServiceRequest
         fields = ['request_id', 'customer', 'customer_name', 'service', 
-                  'service_name', 'device_type', 'device_brand', 'status', 
+                  'service_name', 'professional', 'professional_business_name', 'device_type', 'device_brand', 'status', 
                   'scheduled_for', 'requested_at']
         read_only_fields = ['request_id', 'requested_at']
 
@@ -100,9 +99,10 @@ class ServiceRequestCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ServiceRequest
+
         fields = ['customer', 'address', 'service', 'device_type', 
                   'device_brand', 'device_model', 'device_issue_description', 
-                  'special_instructions', 'scheduled_for']
+                  'special_instructions', 'scheduled_for', 'professional']
     
     def validate(self, data):
         # Validate that address belongs to customer
