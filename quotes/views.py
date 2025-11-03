@@ -45,7 +45,7 @@ def quote_list_create(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def quote_detail(request, quote_id):
@@ -61,6 +61,14 @@ def quote_detail(request, quote_id):
     elif request.method == "PUT":
         # partial=True would make this a PATCH, but we'll follow your PUT logic
         serializer = QuoteSerializer(quote, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == "PATCH":
+        # Partial update — only update provided fields
+        serializer = QuoteSerializer(quote, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
