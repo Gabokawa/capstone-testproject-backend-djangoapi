@@ -5,14 +5,6 @@ from services.models import Service
 from professionals.models import Professional
 
 
-# class RequestMediaSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = RequestMedia
-#         fields = ['media_id', 'request', 'media_type', 'media_name', 
-#                   'media_uri', 'thumbnail_uri', 'media_size', 
-#                   'uploaded_at', 'caption', 'is_public']
-#         read_only_fields = ['media_id', 'uploaded_at']
-
 class RequestMediaSerializer(serializers.ModelSerializer):
     # This field accepts the actual file upload.
     # It must match the key you used in formData.append()
