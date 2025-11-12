@@ -9,6 +9,10 @@ from .models import Professional, ProfessionalDocument, WorkingHours, Profession
 from users.models import User
 from services.models import Service
 import json
+from .serializers import (ProfessionalSerializer, 
+                          ProfessionalDocumentSerializer, 
+                          WorkingHoursSerializer, 
+                          ProfessionalServiceSerializer)
 
 # ==================== PROFESSIONAL VIEWS ====================
 
@@ -100,21 +104,23 @@ def professional_detail(request, professional_id):
         return Response({'error': 'Professional not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        data = {
-            'professional_id': professional.professional_id,
-            'user_id': professional.user_id,
-            'business_name': professional.business_name,
-            'bio': professional.bio,
-            'rating': str(professional.rating),
-            'total_reviews': professional.total_reviews,
-            'completed_jobs': professional.completed_jobs,
-            'is_verified': professional.is_verified,
-            'is_available': professional.is_available,
-            'availability_notes': professional.availability_notes,
-            'last_active': professional.last_active.isoformat(),
-            'service_radius_km': str(professional.service_radius_km),
-        }
-        return Response(data, status=status.HTTP_200_OK)
+        # data = {
+        #     'professional_id': professional.professional_id,
+        #     'user_id': professional.user_id,
+        #     'business_name': professional.business_name,
+        #     'bio': professional.bio,
+        #     'rating': str(professional.rating),
+        #     'total_reviews': professional.total_reviews,
+        #     'completed_jobs': professional.completed_jobs,
+        #     'is_verified': professional.is_verified,
+        #     'is_available': professional.is_available,
+        #     'availability_notes': professional.availability_notes,
+        #     'last_active': professional.last_active.isoformat(),
+        #     'service_radius_km': str(professional.service_radius_km),
+        # }
+        # return Response(data, status=status.HTTP_200_OK)
+        serializer = ProfessionalSerializer(professional)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == "PUT":
         data = request.data

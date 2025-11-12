@@ -126,7 +126,7 @@ def booking_detail(request, booking_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     elif request.method == "PUT":
-        serializer = BookingSerializer(booking, data=request.data)
+        serializer = BookingSerializer(booking, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
