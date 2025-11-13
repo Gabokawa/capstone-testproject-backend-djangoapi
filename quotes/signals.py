@@ -20,7 +20,7 @@ def create_booking_when_quote_accepted(sender, instance, created, **kwargs):
         Booking.objects.create(
             request=instance.request,
             quote=instance,
-            booking_date=timezone.now(),
+            booking_date=instance.service_date,
             start_time=instance.start_time,
             end_time=instance.end_time,
             final_price=instance.total_quote_amount,

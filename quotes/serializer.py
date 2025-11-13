@@ -2,9 +2,16 @@ from rest_framework import serializers
 from .models import Quote, Booking, ServiceIssue
 from requests.serializers import ServiceRequestDetailSerializer
 from professionals.serializers import ProfessionalSerializer
+from professionals.models import Professional
 
 class QuoteSerializer(serializers.ModelSerializer):
     professional = ProfessionalSerializer(read_only=True)
+    # For input: allow passing a professional ID
+    professional_id = serializers.PrimaryKeyRelatedField(
+        queryset=Professional.objects.all(),
+        source='professional',  # tells DRF to assign this to the professional FK
+        write_only=True
+    )
     class Meta:
         model = Quote
         fields = '__all__'  # This tells DRF to serialize *all* fields on the model
