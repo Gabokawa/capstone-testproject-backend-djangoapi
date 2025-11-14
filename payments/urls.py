@@ -4,6 +4,7 @@ from .views import (
     PaymentRetrieveUpdateDeleteView,
     PaymentTransactionListCreateView,
     PaymentTransactionRetrieveUpdateDeleteView,
+    VerifyPaymentView
 )
 
 urlpatterns = [
@@ -14,4 +15,7 @@ urlpatterns = [
     # Payment Transaction Endpoints
     path('transactions/', PaymentTransactionListCreateView.as_view(), name='transactions'),
     path('transactions/<int:pk>/', PaymentTransactionRetrieveUpdateDeleteView.as_view(), name='transaction_detail'),
+
+    # Payment Proof Endpoints
+    path('proofs/<int:booking_id>/', VerifyPaymentView.as_view(), name='payment_proof')
 ]

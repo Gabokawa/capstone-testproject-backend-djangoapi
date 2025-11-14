@@ -58,3 +58,8 @@ class PaymentTransaction(models.Model):
     
     def __str__(self):
         return f"{self.payment} - {self.provider} - {self.provider_transaction_id}"
+
+class PaymentProof(models.Model):
+    payment = models.ForeignKey(Payment, related_name="proofs", on_delete=models.CASCADE)
+    file = models.FileField(upload_to="payment_proofs/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
