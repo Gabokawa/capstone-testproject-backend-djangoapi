@@ -58,12 +58,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Validate user owns the booking before creating review"""
         booking = serializer.validated_data['booking']
+        user = self.request.user
         
         # Check if user is the customer who made the booking
-        if not hasattr(self.request.user, 'customer'):
+        if user.user_type != 'customer':
             raise serializers.ValidationError("Only customers can create reviews")
         
-        if booking.request.customer != self.request.user.customer:
+        if booking.request.customer != user:
             raise serializers.ValidationError("You can only review your own bookings")
         
         serializer.save()
