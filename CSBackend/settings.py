@@ -105,24 +105,24 @@ DATABASES = {
     # ) 
 
     # # THIS IS LOCALHOST CONFIG
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'testdb1',      # Replace with your database name
-    #     'USER': 'postgres',      # Replace with your PostgreSQL user
-    #     'PASSWORD': 'postgresqlpassword',  # Replace with your PostgreSQL password
-    #     'HOST': 'localhost',         # Or your database host if different
-    #     'PORT': '5432',              # Default PostgreSQL port
-    # }
-
-    # DEPLOY CONFIG 
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'testdb1_7rb3',      # Replace with your database name
-        'USER': 'outzrdbuser',      # Replace with your PostgreSQL user
-        'PASSWORD': 'YFg0co0xB4dIN8FfGnB2Fc4GWyyM8lcR',  # Replace with your PostgreSQL password
-        'HOST': 'dpg-d4fhptre5dus73ck8r90-a',         # Or your database host if different
+        'NAME': 'testdb1',      # Replace with your database name
+        'USER': 'postgres',      # Replace with your PostgreSQL user
+        'PASSWORD': 'postgresqlpassword',  # Replace with your PostgreSQL password
+        'HOST': 'localhost',         # Or your database host if different
         'PORT': '5432',              # Default PostgreSQL port
     }
+
+    # DEPLOY CONFIG 
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'testdb1_7rb3',      # Replace with your database name
+    #     'USER': 'outzrdbuser',      # Replace with your PostgreSQL user
+    #     'PASSWORD': 'YFg0co0xB4dIN8FfGnB2Fc4GWyyM8lcR',  # Replace with your PostgreSQL password
+    #     'HOST': 'dpg-d4fhptre5dus73ck8r90-a',         # Or your database host if different
+    #     'PORT': '5432',              # Default PostgreSQL port
+    # }
 
 }
 
@@ -225,4 +225,3 @@ SIMPLE_JWT = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-CORS_ALLOW_ALL_ORIGINS = True # THIS IS APPARENTLY UNSECURE SO I GUESS REMOVE IT LATER ON?
