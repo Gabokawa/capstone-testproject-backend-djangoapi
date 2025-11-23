@@ -39,7 +39,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         """Filter reviews based on user role and visibility"""
         user = self.request.user
         queryset = Review.objects.select_related(
-            'booking__request__customer__user',
+            'booking__request__customer',
             'booking__quote__professional__user'
         ).all()
         
