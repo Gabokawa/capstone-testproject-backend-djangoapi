@@ -104,7 +104,7 @@ DATABASES = {
     #     default = os.getenv('DATABASE_URL')  # this is for connection to db
     # ) 
 
-    # THIS IS LOCALHOST CONFIG
+    # # THIS IS LOCALHOST CONFIG
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
     #     'NAME': 'testdb1',      # Replace with your database name
@@ -225,3 +225,4 @@ SIMPLE_JWT = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+CORS_ALLOW_ALL_ORIGINS = True # THIS IS APPARENTLY UNSECURE SO I GUESS REMOVE IT LATER ON?
