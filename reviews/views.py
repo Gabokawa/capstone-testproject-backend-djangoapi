@@ -13,157 +13,8 @@ from .serializers import (
 )
 from quotes.models import Booking
 
-# class ReviewViewSet(viewsets.ModelViewSet):
-#     """
-#     CRUD operations for Reviews
-    
-#     List: GET /reviews/
-#     Create: POST /reviews/
-#     Retrieve: GET /reviews/{id}/
-#     Update: PUT/PATCH /reviews/{id}/
-#     Delete: DELETE /reviews/{id}/
-    
-#     Custom actions:
-#     - my_reviews: GET /reviews/my_reviews/
-#     - professional_reviews: GET /reviews/professional_reviews/{professional_id}/
-#     - booking_review: GET /reviews/booking_review/{booking_id}/
-#     """
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
-#     ordering_fields = ['created_at', 'rating']
-#     ordering = ['-created_at']
-#     search_fields = ['review_text']
-    
-#     def get_queryset(self):
-#         """Filter reviews based on user role and visibility"""
-#         user = self.request.user
-#         queryset = Review.objects.select_related(
-#             'booking__request__customer',
-#             'booking__quote__professional__user'
-#         ).all()
-        
-#         # Filter by visibility for non-owners
-#         if not (hasattr(user, 'customer') or hasattr(user, 'professional')):
-#             queryset = queryset.filter(is_visible=True)
-        
-#         return queryset
-    
-#     def get_serializer_class(self):
-#         """Use lightweight serializer for list view"""
-#         if self.action == 'list':
-#             return ReviewListSerializer
-#         return ReviewSerializer
-    
-#     def perform_create(self, serializer):
-#         """Validate user owns the booking before creating review"""
-#         booking = serializer.validated_data['booking']
-#         user = self.request.user
-        
-#         # Check if user is the customer who made the booking
-#         if user.user_type != 'customer':
-#             raise serializers.ValidationError("Only customers can create reviews")
-        
-#         if booking.request.customer != user:
-#             raise serializers.ValidationError("You can only review your own bookings")
-        
-#         serializer.save()
-    
-#     def perform_update(self, serializer):
-#         """Only allow customer who created review to update it"""
-#         review = self.get_object()
-        
-#         if not hasattr(self.request.user, 'customer'):
-#             raise serializers.ValidationError("Only customers can update reviews")
-        
-#         if review.booking.request.customer != self.request.user.customer:
-#             raise serializers.ValidationError("You can only update your own reviews")
-        
-#         serializer.save()
-    
-#     def perform_destroy(self, instance):
-#         """Only allow customer who created review to delete it"""
-#         if not hasattr(self.request.user, 'customer'):
-#             raise serializers.ValidationError("Only customers can delete reviews")
-        
-#         if instance.booking.request.customer != self.request.user.customer:
-#             raise serializers.ValidationError("You can only delete your own reviews")
-        
-#         instance.delete()
-    
-#     @action(detail=False, methods=['get'])
-#     def my_reviews(self, request):
-#         """Get all reviews created by the logged-in customer"""
-#         if not hasattr(request.user, 'customer'):
-#             return Response(
-#                 {"error": "Only customers can access this endpoint"},
-#                 status=status.HTTP_403_FORBIDDEN
-#             )
-        
-#         reviews = self.get_queryset().filter(
-#             booking__request__customer=request.user.customer
-#         )
-#         serializer = self.get_serializer(reviews, many=True)
-#         return Response(serializer.data)
-    
-#     @action(detail=False, methods=['get'], url_path='professional/(?P<professional_id>[^/.]+)')
-#     def professional_reviews(self, request, professional_id=None):
-#         """Get all reviews for a specific professional with average rating"""
-#         reviews = self.get_queryset().filter(
-#             booking__quote__professional_id=professional_id,
-#             is_visible=True
-#         )
-        
-#         avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
-        
-#         serializer = self.get_serializer(reviews, many=True)
-#         return Response({
-#             'reviews': serializer.data,
-#             'average_rating': round(avg_rating, 2) if avg_rating else 0,
-#             'total_reviews': reviews.count()
-#         })
-    
-#     @action(detail=False, methods=['get'], url_path='booking/(?P<booking_id>[^/.]+)')
-#     def booking_review(self, request, booking_id=None):
-#         """Get review for a specific booking"""
-#         try:
-#             review = self.get_queryset().get(booking_id=booking_id)
-#             serializer = self.get_serializer(review)
-#             return Response(serializer.data)
-#         except Review.DoesNotExist:
-#             return Response(
-#                 {"error": "Review not found for this booking"},
-#                 status=status.HTTP_404_NOT_FOUND
-#             )
-    
-#     @action(detail=True, methods=['patch'])
-#     def toggle_visibility(self, request, pk=None):
-#         """Toggle review visibility (admin/professional only)"""
-#         review = self.get_object()
-        
-#         # Only professional can toggle visibility of their reviews
-#         if hasattr(request.user, 'professional'):
-#             if review.booking.quote.professional != request.user.professional:
-#                 return Response(
-#                     {"error": "You can only toggle visibility of your own reviews"},
-#                     status=status.HTTP_403_FORBIDDEN
-#                 )
-#         else:
-#             return Response(
-#                 {"error": "Only professionals can toggle review visibility"},
-#                 status=status.HTTP_403_FORBIDDEN
-#             )
-        
-#         review.is_visible = not review.is_visible
-#         review.save()
-        
-#         serializer = self.get_serializer(review)
-#         return Response(serializer.data)
-
 class ReviewViewSet(viewsets.ModelViewSet):
     """
-    CRUD operations for Reviews
-    
     CRUD operations for Reviews
     
     List: GET /reviews/
@@ -174,9 +25,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     
     Custom actions:
     - my_reviews: GET /reviews/my_reviews/
-    - professional_reviews: GET /reviews/professional/{professional_id}/
+    - professional_reviews: GET /reviews/professional_reviews/{professional_id}/
     - booking_review: GET /reviews/booking_review/{booking_id}/
-    
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -189,12 +39,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
         """Filter reviews based on user role and visibility"""
         user = self.request.user
         queryset = Review.objects.select_related(
-            'booking__request__customer',
+            'booking__request__customer__user',
             'booking__quote__professional__user'
         ).all()
         
         # Filter by visibility for non-owners
-        if user.user_type not in ['customer', 'repairman', 'admin']:
+        if not (hasattr(user, 'customer') or hasattr(user, 'professional')):
             queryset = queryset.filter(is_visible=True)
         
         return queryset
@@ -214,7 +64,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if user.user_type != 'customer':
             raise serializers.ValidationError("Only customers can create reviews")
         
-        if booking.request.customer != user:  # Compare User objects directly
+        if booking.request.customer != user:
             raise serializers.ValidationError("You can only review your own bookings")
         
         serializer.save()
@@ -222,24 +72,21 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         """Only allow customer who created review to update it"""
         review = self.get_object()
-        user = self.request.user
         
-        if user.user_type != 'customer':
+        if not hasattr(self.request.user, 'customer'):
             raise serializers.ValidationError("Only customers can update reviews")
         
-        if review.booking.request.customer != user:  # Compare User objects directly
+        if review.booking.request.customer != self.request.user.customer:
             raise serializers.ValidationError("You can only update your own reviews")
         
         serializer.save()
     
     def perform_destroy(self, instance):
         """Only allow customer who created review to delete it"""
-        user = self.request.user
-        
-        if user.user_type != 'customer':
+        if not hasattr(self.request.user, 'customer'):
             raise serializers.ValidationError("Only customers can delete reviews")
         
-        if instance.booking.request.customer != user:  # Compare User objects directly
+        if instance.booking.request.customer != self.request.user.customer:
             raise serializers.ValidationError("You can only delete your own reviews")
         
         instance.delete()
@@ -247,14 +94,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_reviews(self, request):
         """Get all reviews created by the logged-in customer"""
-        if request.user.user_type != 'customer':
+        if not hasattr(request.user, 'customer'):
             return Response(
                 {"error": "Only customers can access this endpoint"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         reviews = self.get_queryset().filter(
-            booking__request__customer=request.user  # Use user directly
+            booking__request__customer=request.user.customer
         )
         serializer = self.get_serializer(reviews, many=True)
         return Response(serializer.data)
@@ -269,13 +116,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         
         avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
         
-        pending_responses = reviews.filter(has_response=False).count()
         serializer = self.get_serializer(reviews, many=True)
         return Response({
             'reviews': serializer.data,
             'average_rating': round(avg_rating, 2) if avg_rating else 0,
-            'total_reviews': reviews.count(),
-            'pending_responses': pending_responses
+            'total_reviews': reviews.count()
         })
     
     @action(detail=False, methods=['get'], url_path='booking/(?P<booking_id>[^/.]+)')
@@ -295,11 +140,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def toggle_visibility(self, request, pk=None):
         """Toggle review visibility (admin/professional only)"""
         review = self.get_object()
-        user = request.user
         
         # Only professional can toggle visibility of their reviews
-        if user.user_type == 'repairman' and hasattr(user, 'professional'):
-            if review.booking.quote.professional != user.professional:
+        if hasattr(request.user, 'professional'):
+            if review.booking.quote.professional != request.user.professional:
                 return Response(
                     {"error": "You can only toggle visibility of your own reviews"},
                     status=status.HTTP_403_FORBIDDEN
@@ -315,6 +159,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(review)
         return Response(serializer.data)
+
 
 class ReviewResponseViewSet(viewsets.ModelViewSet):
     """

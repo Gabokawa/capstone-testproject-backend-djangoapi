@@ -54,7 +54,6 @@ class Booking(models.Model):
     final_price = models.DecimalField(max_digits=10, decimal_places=2)
     completion_notes = models.TextField(blank=True, null=True)
     cancellation_reason = models.TextField(blank=True, null=True)
-    is_reviewed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(blank=True, null=True)
     

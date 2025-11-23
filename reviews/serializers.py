@@ -4,16 +4,11 @@ from .models import Review, ReviewResponse
 from quotes.models import Booking
 
 class ReviewSerializer(serializers.ModelSerializer):
-    # Nested customer object
-    customer = serializers.SerializerMethodField()
-    
-    # Other fields
-    booking_id = serializers.IntegerField(source='booking.booking_id', read_only=True)
-    service_type = serializers.SerializerMethodField()
-    device_info = serializers.SerializerMethodField()
-    
-    # For creating reviews
-    booking_id_input = serializers.PrimaryKeyRelatedField(
+    # Read-only fields for additional context
+    customer_name = serializers.SerializerMethodField()
+    professional_name = serializers.SerializerMethodField()
+    service_name = serializers.SerializerMethodField()
+    booking_id = serializers.PrimaryKeyRelatedField(
         queryset=Booking.objects.all(),
         source='booking',
         write_only=True
@@ -23,53 +18,38 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = [
             'review_id',
+            'booking',
             'booking_id',
-            'booking_id_input',
-            'customer',
             'rating',
             'review_text',
             'created_at',
             'is_visible',
             'has_response',
-            'service_type',
-            'device_info'
+            'customer_name',
+            'professional_name',
+            'service_name'
         ]
-        read_only_fields = ['review_id', 'booking_id', 'created_at', 'has_response']
+        read_only_fields = ['review_id', 'created_at', 'has_response', 'booking']
     
-    def get_customer(self, obj):
-        """Return customer information as nested object"""
+    def get_customer_name(self, obj):
         try:
-            customer_user = obj.booking.request.customer
-            return {
-                'user_id': customer_user.id,
-                'first_name': customer_user.first_name,
-                'last_name': customer_user.last_name,
-                'profile_picture': customer_user.profile_picture
-            }
-        except:
-            return {
-                'user_id': None,
-                'first_name': 'Unknown',
-                'last_name': '',
-                'profile_picture': None
-            }
-    
-    def get_service_type(self, obj):
-        """Return the service type name"""
-        try:
-            return obj.booking.request.service.name
+            return f"{obj.booking.request.customer.user.first_name} {obj.booking.request.customer.user.last_name}"
         except:
             return "Unknown"
     
-    def get_device_info(self, obj):
-        """Return formatted device information"""
+    def get_professional_name(self, obj):
         try:
-            request = obj.booking.request
-            return f"{request.device_brand} {request.device_model}"
+            return f"{obj.booking.quote.professional.user.first_name} {obj.booking.quote.professional.user.last_name}"
         except:
             return "Unknown"
     
-    def validate_booking_id_input(self, value):
+    def get_service_name(self, obj):
+        try:
+            return obj.booking.request.service_type.name
+        except:
+            return "Unknown"
+    
+    def validate_booking(self, value):
         """Ensure booking is completed before allowing review"""
         if value.status != 'completed':
             raise serializers.ValidationError("Can only review completed bookings")
@@ -79,6 +59,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Review already exists for this booking")
         
         return value
+
 
 class ReviewResponseSerializer(serializers.ModelSerializer):
     review_id = serializers.PrimaryKeyRelatedField(
@@ -116,55 +97,39 @@ class ReviewResponseSerializer(serializers.ModelSerializer):
 
 class ReviewListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing reviews"""
-    customer = serializers.SerializerMethodField()
-    booking_id = serializers.IntegerField(source='booking.booking_id', read_only=True)
-    service_type = serializers.SerializerMethodField()
-    device_info = serializers.SerializerMethodField()
+    customer_name = serializers.SerializerMethodField()
+    professional_name = serializers.SerializerMethodField()
+    has_response_text = serializers.SerializerMethodField()
     
     class Meta:
         model = Review
         fields = [
             'review_id',
-            'booking_id',
-            'customer',
             'rating',
             'review_text',
             'created_at',
             'is_visible',
             'has_response',
-            'service_type',
-            'device_info'
+            'customer_name',
+            'professional_name',
+            'has_response_text'
         ]
     
-    def get_customer(self, obj):
-        """Return customer information as nested object"""
+    def get_customer_name(self, obj):
         try:
-            customer_user = obj.booking.request.customer
-            return {
-                'user_id': customer_user.id,
-                'first_name': customer_user.first_name,
-                'last_name': customer_user.last_name,
-                'profile_picture': customer_user.profile_picture
-            }
-        except:
-            return {
-                'user_id': None,
-                'first_name': 'Unknown',
-                'last_name': '',
-                'profile_picture': None
-            }
-    
-    def get_service_type(self, obj):
-        """Return the service type name"""
-        try:
-            return obj.booking.request.service.service_name
+            return f"{obj.booking.request.customer.user.first_name} {obj.booking.request.customer.user.last_name}"
         except:
             return "Unknown"
     
-    def get_device_info(self, obj):
-        """Return formatted device information"""
+    def get_professional_name(self, obj):
         try:
-            request = obj.booking.request
-            return f"{request.device_brand} {request.device_model}"
+            return f"{obj.booking.quote.professional.user.first_name} {obj.booking.quote.professional.user.last_name}"
         except:
             return "Unknown"
+    
+    def get_has_response_text(self, obj):
+        """Get the response text if it exists"""
+        try:
+            return obj.reviewresponse.response_text
+        except ReviewResponse.DoesNotExist:
+            return None
