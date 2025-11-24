@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
@@ -379,7 +380,14 @@ class AddressDetailView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied("You do not have permission to delete this address.")
         instance.delete()
 
-
+@require_http_methods(["GET"])
+def check_storage_config(request):
+    return JsonResponse({
+        'DEFAULT_FILE_STORAGE': getattr(settings, 'DEFAULT_FILE_STORAGE', 'NOT SET'),
+        'CLOUDINARY_CLOUD_NAME': settings.CLOUDINARY_STORAGE.get('CLOUD_NAME', 'NOT SET'),
+        'CLOUDINARY_STORAGE_EXISTS': hasattr(settings, 'CLOUDINARY_STORAGE'),
+        'installed_apps_snippet': settings.INSTALLED_APPS[:5],  # First 5 apps
+    })
 
 
 
