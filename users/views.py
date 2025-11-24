@@ -394,27 +394,29 @@ def test_file_upload(request):
     from django.core.files.storage import default_storage
     from django.core.files.base import ContentFile
     
-    # Check what storage backend is being used
     storage_class = type(default_storage).__name__
     storage_module = type(default_storage).__module__
     
-    # Try to save a test file
     try:
-        test_content = ContentFile(b'test', name='test.txt')
-        file_name = default_storage.save('test_upload.txt', test_content)
+        # Use actual text content instead of pretending it's an image
+        test_content = ContentFile(b'test content for storage', name='test.txt')
+        file_name = default_storage.save('test_files/test_upload.txt', test_content)
         file_url = default_storage.url(file_name)
         
         return JsonResponse({
             'storage_class': storage_class,
             'storage_module': storage_module,
+            'test_file_name': file_name,
             'test_file_url': file_url,
-            'is_cloudinary': 'cloudinary' in file_url.lower()
+            'is_cloudinary': 'cloudinary' in file_url.lower(),
+            'success': True
         })
     except Exception as e:
         return JsonResponse({
             'storage_class': storage_class,
             'storage_module': storage_module,
-            'error': str(e)
+            'error': str(e),
+            'error_type': type(e).__name__
         })
 
 
