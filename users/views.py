@@ -314,7 +314,7 @@ def get_user_details_by_id(request, user_id):
         "username": user.username,
         "email": user.email,
         "phone_number": user.phone_number,
-        "profile_picture": user.profile_picture.url if user.profile_picture else None,
+        "profile_picture": user.profile_picture if user.profile_picture else None,
         "user_type": user.user_type,
         "is_active": user.is_active,
         "is_staff": user.is_staff,
