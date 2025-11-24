@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',   
     'rest_framework',  
+    'cloudinary_storage',
+    'cloudinary',
     'users',           
     'corsheaders',  
     'services',
@@ -222,7 +224,13 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dhsykiovo',
+    'API_KEY': '123242889357429', 
+    'API_SECRET': 'DlDSWWLEMRSoz5Sy22yCf-6X1pc',
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-CORS_ALLOW_ALL_ORIGINS = True # THIS IS APPARENTLY UNSECURE SO I GUESS REMOVE IT LATER ON?
