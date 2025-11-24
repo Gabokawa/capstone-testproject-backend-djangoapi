@@ -346,17 +346,10 @@ def professional_service_list_create(request):
         if is_available is not None:
             prof_services = prof_services.filter(is_available=is_available.lower() == 'true')
 
-        data = [{
-            'prof_service_id': ps.prof_service_id,
-            'professional_id': ps.professional_id,
-            'service_id': ps.service_id,
-            'custom_price_range': ps.custom_price_range,
-            'service_notes': ps.service_notes,
-            'estimated_duration_minutes': ps.estimated_duration_minutes,
-            'is_available': ps.is_available,
-        } for ps in prof_services]
-
-        return Response({'professional_services': data}, status=status.HTTP_200_OK)
+        # Use the serializer instead of manual dict construction
+        serializer = ProfessionalServiceSerializer(prof_services, many=True)
+        
+        return Response({'professional_services': serializer.data}, status=status.HTTP_200_OK)
 
     elif request.method == "POST":
         data = request.data
