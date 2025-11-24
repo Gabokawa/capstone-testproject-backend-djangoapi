@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import get_user_details_by_id, signup, login_view, edit_account, logout_view, delete_account, edit_user_details, get_user_details, AddressListCreateView, AddressDetailView, check_storage_config
+from .views import get_user_details_by_id, signup, login_view, edit_account, logout_view, delete_account, edit_user_details, get_user_details, AddressListCreateView, AddressDetailView, check_storage_config, test_file_upload
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path('addresses/', AddressListCreateView.as_view(), name='address_list_create'),
     path('addresses/<int:address_id>/', AddressDetailView.as_view(), name='address_detail'),
     path('debug/storage/', check_storage_config, name='check_storage_config'),
+    path('debug/test_file_upload/', test_file_upload, name='test_file_upload'),
 ]
 
 # Method	Endpoint	Description

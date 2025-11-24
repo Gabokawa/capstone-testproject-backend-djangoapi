@@ -389,6 +389,32 @@ def check_storage_config(request):
         'installed_apps_snippet': settings.INSTALLED_APPS[:5],  # First 5 apps
     })
 
-
+@require_http_methods(["GET"])
+def test_file_upload(request):
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+    
+    # Check what storage backend is being used
+    storage_class = type(default_storage).__name__
+    storage_module = type(default_storage).__module__
+    
+    # Try to save a test file
+    try:
+        test_content = ContentFile(b'test', name='test.txt')
+        file_name = default_storage.save('test_upload.txt', test_content)
+        file_url = default_storage.url(file_name)
+        
+        return JsonResponse({
+            'storage_class': storage_class,
+            'storage_module': storage_module,
+            'test_file_url': file_url,
+            'is_cloudinary': 'cloudinary' in file_url.lower()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'storage_class': storage_class,
+            'storage_module': storage_module,
+            'error': str(e)
+        })
 
 
