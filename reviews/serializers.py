@@ -5,8 +5,8 @@ from quotes.models import Booking
 
 class ReviewSerializer(serializers.ModelSerializer):
     # Read-only fields for additional context
-    customer_name = serializers.SerializerMethodField()
-    professional_name = serializers.SerializerMethodField()
+    customer = serializers.SerializerMethodField()
+    professional = serializers.SerializerMethodField()
     service_name = serializers.SerializerMethodField()
     booking_id = serializers.PrimaryKeyRelatedField(
         queryset=Booking.objects.all(),
@@ -25,19 +25,31 @@ class ReviewSerializer(serializers.ModelSerializer):
             'created_at',
             'is_visible',
             'has_response',
-            'customer_name',
-            'professional_name',
+            'customer',
+            'professional',
             'service_name'
         ]
         read_only_fields = ['review_id', 'created_at', 'has_response', 'booking']
     
-    def get_customer_name(self, obj):
+    def get_customer(self, obj):
+        """Return customer information as nested object"""
         try:
-            return f"{obj.booking.request.customer.user.first_name} {obj.booking.request.customer.user.last_name}"
+            customer_user = obj.booking.request.customer  # ✅ customer IS the User
+            return {
+                'user_id': customer_user.id,
+                'first_name': customer_user.first_name,
+                'last_name': customer_user.last_name,
+                'profile_picture': customer_user.profile_picture
+            }
         except:
-            return "Unknown"
+            return {
+                'user_id': None,
+                'first_name': 'Unknown',
+                'last_name': '',
+                'profile_picture': None
+            }
     
-    def get_professional_name(self, obj):
+    def get_professional(self, obj):
         try:
             return f"{obj.booking.quote.professional.user.first_name} {obj.booking.quote.professional.user.last_name}"
         except:
@@ -116,10 +128,22 @@ class ReviewListSerializer(serializers.ModelSerializer):
         ]
     
     def get_customer_name(self, obj):
+        """Return customer information as nested object"""
         try:
-            return f"{obj.booking.request.customer.user.first_name} {obj.booking.request.customer.user.last_name}"
+            customer_user = obj.booking.request.customer  # ✅ customer IS the User
+            return {
+                'user_id': customer_user.id,
+                'first_name': customer_user.first_name,
+                'last_name': customer_user.last_name,
+                'profile_picture': customer_user.profile_picture
+            }
         except:
-            return "Unknown"
+            return {
+                'user_id': None,
+                'first_name': 'Unknown',
+                'last_name': '',
+                'profile_picture': None
+            }
     
     def get_professional_name(self, obj):
         try:
