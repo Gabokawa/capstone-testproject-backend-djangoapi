@@ -55,9 +55,22 @@ INSTALLED_APPS = [
     'payments',
     'chat',
     'reviews',
-    'notifications',
-    
+    'notifications', 
 ]
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dhsykiovo',
+    'API_KEY': '123242889357429', 
+    'API_SECRET': 'DlDSWWLEMRSoz5Sy22yCf-6X1pc',
+}
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', 
@@ -222,21 +235,6 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
-}
-
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dhsykiovo',
-    'API_KEY': '123242889357429', 
-    'API_SECRET': 'DlDSWWLEMRSoz5Sy22yCf-6X1pc',
-}
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
 }
 
 MEDIA_URL = '/media/'
