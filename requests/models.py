@@ -22,11 +22,19 @@ class ServiceRequest(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
 
     # connecting this shit to professional model
+    # original field for one to many relationship
     professional = models.ForeignKey(
         Professional, 
         on_delete=models.SET_NULL, # so deleting wont delete the professional
         null=True,                  # allows a request to be unassigned
         blank=True,                 # allows it to be empty in forms
+        related_name="service_requests"
+    )
+
+    # NEW: Multiple professionals (for bidding system)
+    professionals = models.ManyToManyField(
+        Professional,
+        blank=True,
         related_name="service_requests"
     )
 

@@ -96,13 +96,17 @@ class ServiceRequestDetailSerializer(serializers.ModelSerializer):
 
 class ServiceRequestCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating service requests"""
-    
+    professionals = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Professional.objects.all(),
+        required=False
+    )
     class Meta:
         model = ServiceRequest
 
         fields = ['customer', 'address', 'service', 'device_type', 
                   'device_brand', 'device_model', 'device_issue_description', 
-                  'special_instructions', 'scheduled_for', 'professional']
+                  'special_instructions', 'scheduled_for', 'professional', 'professionals']
     
     def validate(self, data):
         # Validate that address belongs to customer
