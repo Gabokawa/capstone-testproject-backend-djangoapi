@@ -28,14 +28,14 @@ class ServiceRequest(models.Model):
         on_delete=models.SET_NULL, # so deleting wont delete the professional
         null=True,                  # allows a request to be unassigned
         blank=True,                 # allows it to be empty in forms
-        related_name="service_requests"
+        related_name="assigned_service_requests"
     )
 
     # NEW: Multiple professionals (for bidding system)
     professionals = models.ManyToManyField(
         Professional,
         blank=True,
-        related_name="service_requests"
+        related_name="potential_service_requests"
     )
 
     device_type = models.CharField(max_length=100)
