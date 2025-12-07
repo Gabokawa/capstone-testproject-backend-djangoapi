@@ -52,7 +52,7 @@ class ServiceRequestViewSet(viewsets.ViewSet):
             # 1. Assigned (in the professional ForeignKey field), OR
             # 2. In the potential professionals list (professionals ManyToManyField)
             queryset = queryset.filter(
-                Q(professional_id=professional_id) | Q(professionals__id=professional_id)
+                Q(professional_id=professional_id) | Q(professionals=professional_id)
             ).distinct()  # Use distinct() to avoid duplicate results from M2M joins
             
         if customer_id:
