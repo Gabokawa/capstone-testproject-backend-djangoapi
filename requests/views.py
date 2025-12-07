@@ -47,7 +47,14 @@ class ServiceRequestViewSet(viewsets.ViewSet):
         professional_id = request.query_params.get('professional', None)
 
         if professional_id:
-            queryset = queryset.filter(professional_id=professional_id)
+            # queryset = queryset.filter(professional_id=professional_id)
+            # Filter for requests where the professional is either:
+            # 1. Assigned (in the professional ForeignKey field), OR
+            # 2. In the potential professionals list (professionals ManyToManyField)
+            queryset = queryset.filter(
+                Q(professional_id=professional_id) | Q(professionals__id=professional_id)
+            ).distinct()  # Use distinct() to avoid duplicate results from M2M joins
+            
         if customer_id:
             queryset = queryset.filter(customer_id=customer_id)
         if status_filter:
