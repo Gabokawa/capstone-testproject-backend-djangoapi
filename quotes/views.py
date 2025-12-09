@@ -153,14 +153,15 @@ def professional_bookings_by_date(request):
         )
     
     try:
-        # Parse the date
-        booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        # Parse the date string to a date object
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         
-        # Get all bookings for this professional on this date
-        # Assuming you have a professional field in your Booking model or through Quote
+        # Filter by year, month, and day to match the exact date
         bookings = Booking.objects.filter(
             quote__professional_id=professional_id,
-            booking_date__date=booking_date
+            booking_date__year=target_date.year,
+            booking_date__month=target_date.month,
+            booking_date__day=target_date.day
         ).exclude(
             status='cancelled'
         ).select_related('quote', 'request')
