@@ -1,6 +1,7 @@
 # === IMPORTS ===
 # We're adding all the DRF bits and get_object_or_404
 # We're removing JsonResponse, csrf_exempt, require_http_methods, and json
+from datetime import datetime
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -136,6 +137,42 @@ def booking_detail(request, booking_id):
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def professional_bookings_by_date(request):
+    """Get bookings for a professional on a specific date"""
+    
+    professional_id = request.GET.get('professional_id')
+    date_str = request.GET.get('date')  # Format: YYYY-MM-DD
+    
+    if not professional_id or not date_str:
+        return Response(
+            {'error': 'professional_id and date are required'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Parse the date
+        booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        
+        # Get all bookings for this professional on this date
+        # Assuming you have a professional field in your Booking model or through Quote
+        bookings = Booking.objects.filter(
+            quote__professional_id=professional_id,
+            booking_date__date=booking_date
+        ).exclude(
+            status='cancelled'
+        ).select_related('quote', 'request')
+        
+        serializer = BookingSerializer(bookings, many=True)
+        return Response({'bookings': serializer.data}, status=status.HTTP_200_OK)
+        
+    except ValueError:
+        return Response(
+            {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 # ============ SERVICE ISSUE VIEWS ============
 # ...and again. So much cleaner.
