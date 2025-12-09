@@ -12,6 +12,10 @@ urlpatterns = [
          name='quote-detail'),
 
     # --- Booking URLs ---
+    
+     path('bookings/by-date/', 
+          views.professional_bookings_by_date, 
+          name='bookings-by-date'),
     path('bookings/', 
          views.booking_list_create, 
          name='booking-list-create'),
@@ -20,9 +24,6 @@ urlpatterns = [
          views.booking_detail, 
          name='booking-detail'),
      
-     path('bookings/by-date/', 
-          views.professional_bookings_by_date, 
-          name='bookings-by-date'),
 
     # --- Service Issue URLs ---
     path('service-issues/', 
