@@ -140,7 +140,7 @@ def professional_detail(request, professional_id):
 def top_professionals(request):
     professionals = Professional.objects.filter(
         is_available=True,
-        is_verified=True
+        # is_verified=True # commented since we dont have verified professionals yet
     ).order_by('-rating', '-total_reviews')[:5]
     
     serializer = ProfessionalSerializer(professionals, many=True)
