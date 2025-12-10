@@ -5,6 +5,7 @@ app_name = 'professionals'
 
 urlpatterns = [
     # Professional URLs
+    path('top/', views.top_professionals, name='top_professionals'),
     path('', views.professional_list_create, name='professional_list_create'),
     path('<int:professional_id>/', views.professional_detail, name='professional_detail'),
     

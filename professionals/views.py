@@ -136,6 +136,15 @@ def professional_detail(request, professional_id):
         professional.delete()
         return Response({'message': 'Professional deleted successfully'}, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def top_professionals(request):
+    professionals = Professional.objects.filter(
+        is_available=True,
+        is_verified=True
+    ).order_by('-rating', '-total_reviews')[:5]
+    
+    serializer = ProfessionalSerializer(professionals, many=True)
+    return Response(serializer.data)
 
 # ==================== PROFESSIONAL DOCUMENT VIEWS ====================
 
