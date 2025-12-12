@@ -146,6 +146,14 @@ def top_professionals(request):
     serializer = ProfessionalSerializer(professionals, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def search_professionals(request):
+    professionals = Professional.objects.filter(
+        is_available=True,
+    ).order_by('-rating', '-total_reviews')
+    
+    serializer = ProfessionalSerializer(professionals, many=True)
+    return Response(serializer.data)
 # ==================== PROFESSIONAL DOCUMENT VIEWS ====================
 
 @api_view(['GET', 'POST'])
